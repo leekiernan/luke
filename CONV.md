@@ -312,6 +312,13 @@ To continue this session, run codex resume, then select Convert Express app to C
     Worked for 1m 48s · done 2:22 PM
 
 
+
+─ Conversation recap ───────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Added import conflict quarantine for duplicate partner-member/email rows with differing member or policy fields:
+  neither is upserted and stored data remains unchanged. Conflict reporting via ImportResult was also added; no next
+  step is recorded.
+
 › Ask Codex to do anything
 
   gpt-5.6-terra high · ~/Sites/perci · Add member sample data and tests
