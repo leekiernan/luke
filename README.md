@@ -79,3 +79,7 @@ speed and simplified dependencies.**
 ## AI
 
 I've abridged the conversation for readability in CONV.md; gpt-5.6-terra high
+
+---
+
+https://www.dropbox.com/scl/fi/b99hco6s4yldq13rm97fg/Screen-Recording-2026-09-23-at-16.14.02.mov?rlkey=onxkcpljuduj8w28nsa2mx4mi&st=0u84phqj&dl=0
