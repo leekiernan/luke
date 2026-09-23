@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { importMembers, memberImportSchema } from './importer.js';
 import { JsonMemberStore } from './store.js';
 
@@ -71,6 +71,22 @@ describe('memberImportSchema', () => {
 
 describe('importMembers', () => {
   describe('persistence', () => {
+    it('loads one composite-key index and saves a multi-row import once', async () => {
+      const dataFile = await writeStoredMembers([]);
+      const csv = await writeCsv([
+        'partner-1,Ada,Lovelace,1815-12-10,ada@example.test,2026-01-01,2026-12-31',
+        'partner-2,Grace,Hopper,1906-12-09,grace@example.test,2026-01-01,2026-12-31',
+      ]);
+      const store = new JsonMemberStore(dataFile);
+      const loadMemberIndex = vi.spyOn(store, 'loadMemberIndex');
+      const saveMemberIndex = vi.spyOn(store, 'saveMemberIndex');
+
+      await expect(importMembers(csv, store)).resolves.toMatchObject({ created: 2 });
+
+      expect(loadMemberIndex).toHaveBeenCalledOnce();
+      expect(saveMemberIndex).toHaveBeenCalledOnce();
+    });
+
     it('adds newly imported members without removing existing data-store records', async () => {
       const existingMember = {
         id: 'member-existing',

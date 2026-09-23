@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
-import type { JsonMemberStore } from './store.js';
+import type { InMemoryMemberIndex, JsonMemberStore } from './store.js';
 import type { ImportConflict, ImportRecord, ImportResult, Member } from './types.js';
 
 const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -99,6 +99,7 @@ export async function importMembers(
     }
   }
 
+  const memberIndex = await store.loadMemberIndex();
   for (const validRow of validRows) {
     const conflict = conflictByRow.get(validRow.row);
     if (conflict) {
@@ -106,8 +107,8 @@ export async function importMembers(
       continue;
     }
 
-    const member = await toMember(validRow.values, store);
-    const status = await store.upsert(member);
+    const member = toMember(validRow.values, memberIndex);
+    const status = memberIndex.upsert(member);
     result[status] += 1;
     result.records.push({
       row: validRow.row,
@@ -117,6 +118,7 @@ export async function importMembers(
     });
   }
 
+  await store.saveMemberIndex(memberIndex);
   result.records.sort((left, right) => left.row - right.row);
   return result;
 }
@@ -180,8 +182,8 @@ function malformedRow(fields: string[]): Record<string, string> {
   return row;
 }
 
-async function toMember(row: MemberImportRow, store: JsonMemberStore): Promise<Member> {
-  const existing = await store.findByPartnerMemberIdAndEmail(row.partner_member_id, row.email);
+function toMember(row: MemberImportRow, memberIndex: InMemoryMemberIndex): Member {
+  const existing = memberIndex.findByPartnerMemberIdAndEmail(row.partner_member_id, row.email);
 
   return {
     id: existing?.id ?? randomUUID(),
